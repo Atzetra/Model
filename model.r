@@ -34,6 +34,8 @@ Vmna <- 12
 Kmna <- 97000
 # Km for PEA to PA conversion by NAAA enzyme
 
+# Add basal synthesis of PEA
+
 para_steady <- unlist(c(data.frame(
     ks,
     kdeg,
@@ -52,6 +54,8 @@ para_steady <- unlist(c(data.frame(
 )))
 para_steady
 
+# Use decrete functions in order to capture end of effect with NAAA and FAAH
+
 PEA_model_steady <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
         dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE)
@@ -64,7 +68,7 @@ PEA_model_steady <- function(t, x, parms) {
     })
 }
 
-t <- seq(0, 240, 1)
+t <- seq(0, 48, 1)
 xstart <- c(
     NAPE = 6.7113176,
     PEA = 0.6714116,
@@ -143,5 +147,9 @@ df_pea_levels$model <- c("steadystate", "no_faaa", "no_naaa")
 df_pea_levels
 
 
+
 f <- ggplot(df_pea_levels, aes(model, PEA))
 f + geom_boxplot()
+
+out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
+plot(out1)out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
