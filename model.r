@@ -7,11 +7,15 @@ library(tidyverse)
 # Model parameters
 ks <- 0.1987
 # synthesis rate of NAPE
+kdegnape <- 0
+# degredation rate of NAPE
 kdeg <- 0.001
 # degradation rate of PA
 kpa <- 0.6
 # basal synthesis of PA
-kpea <- 0.2953
+kpeasyn <- 0.0000
+# basal synthesis of PEA
+kpeadeg <- 0.1
 # basal degredation of PEA
 kass <- 0.005
 # assosiation constant of PPAR
@@ -38,11 +42,13 @@ Kmna <- 97000
 
 para_steady <- unlist(c(data.frame(
     ks,
+    kdegnape,
     kdeg,
     kass,
     kdis,
     kpa,
-    kpea,
+    kpeasyn,
+    kpeadeg,
     Vmpld, # vmax for NAPE to PEA conversion by PLD enzyme
     Kmpld, # Km for NAPE to PEA conversion by PLD enzyme
     Vmgde, # vmax for NAPE to PEA conversion by GDE1_4 enzyme
@@ -58,8 +64,8 @@ para_steady
 
 PEA_model_steady <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE)
-        dPEA <- Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPRA - kpea * PEA
+        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPRA - kpeadeg * PEA
         dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) + Vmna * PEA / (Kmna + PEA) - kdeg * PA
         dPPRA <- kass * PEA - kdis * PPRA
 
@@ -83,8 +89,8 @@ rs_steadystate <- runsteady(y = xstart, func = PEA_model_steady, parms = para_st
 
 PEA_model_no_faah <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE)
-        dPEA <- Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPRA - kpea * PEA
+        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPRA - kpeadeg * PEA
         dPA <- kpa + Vmna * PEA / (Kmna + PEA) - kdeg * PA
         dPPRA <- kass * PEA - kdis * PPRA
 
@@ -95,11 +101,13 @@ PEA_model_no_faah <- function(t, x, parms) {
 
 para_no_faah <- unlist(c(data.frame(
     ks,
+    kdegnape,
     kdeg,
     kass,
     kdis,
     kpa,
-    kpea,
+    kpeasyn,
+    kpeadeg,
     Vmpld, # vmax for NAPE to PEA conversion by PLD enzyme
     Kmpld, # Km for NAPE to PEA conversion by PLD enzyme
     Vmgde, # vmax for NAPE to PEA conversion by GDE1_4 enzyme
@@ -114,8 +122,8 @@ rs_no_faah <- runsteady(y = xstart, func = PEA_model_no_faah, parms = para_no_fa
 
 PEA_model_no_naaa <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE)
-        dPEA <- Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - kass * PEA + kdis * PPRA - kpea * PEA
+        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - kass * PEA + kdis * PPRA - kpeadeg * PEA
         dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) - kdeg * PA
         dPPRA <- kass * PEA - kdis * PPRA
 
@@ -126,11 +134,13 @@ PEA_model_no_naaa <- function(t, x, parms) {
 
 para_no_naaa <- unlist(c(data.frame(
     ks,
+    kdegnape,
     kdeg,
     kass,
     kdis,
     kpa,
-    kpea,
+    kpeasyn,
+    kpeadeg,
     Vmpld, # vmax for NAPE to PEA conversion by PLD enzyme
     Kmpld, # Km for NAPE to PEA conversion by PLD enzyme
     Vmgde, # vmax for NAPE to PEA conversion by GDE1_4 enzyme
@@ -142,14 +152,45 @@ para_no_naaa
 
 rs_no_naaa <- runsteady(y = xstart, func = PEA_model_no_naaa, parms = para_no_naaa, times = c(0, 1e18))
 (df_pea_levels <- rbind(df_pea_levels, rs_no_naaa$y))
+
+PEA_model_no_both <- function(t, x, parms) {
+    with(as.list(c(parms, x)), {
+        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - kpeadeg * PEA
+        dPA <- kpa - kdeg * PA
+        dPPRA <- kass * PEA - kdis * PPRA
+
+        res <- c(dNAPE, dPEA, dPA, dPPRA)
+        list(res)
+    })
+}
+
+para_no_both <- unlist(c(data.frame(
+    ks,
+    kdegnape,
+    kdeg,
+    kass,
+    kdis,
+    kpa,
+    kpeasyn,
+    kpeadeg,
+    Vmpld, # vmax for NAPE to PEA conversion by PLD enzyme
+    Kmpld, # Km for NAPE to PEA conversion by PLD enzyme
+    Vmgde, # vmax for NAPE to PEA conversion by GDE1_4 enzyme
+    Kmgde # Km for NAPE to PEA conversion by GDE1_4 enzyme
+)))
+
+rs_no_no_both <- runsteady(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = c(0, 1e18))
+df_pea_levels <- rbind(df_pea_levels, rs_no_no_both$y)
+
 df_pea_levels <- as.data.frame(df_pea_levels)
-df_pea_levels$model <- c("steadystate", "no_faaa", "no_naaa")
+df_pea_levels$model <- c("steadystate", "no_faaa", "no_naaa", "no_both")
 df_pea_levels
 
 
 
-f <- ggplot(df_pea_levels, aes(model, PEA))
-f + geom_boxplot()
+# f <- ggplot(df_pea_levels, aes(model, PEA))
+# f + geom_col()
 
-out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
-plot(out1)
+# out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
+# plot(out1)
