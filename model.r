@@ -152,4 +152,4 @@ f <- ggplot(df_pea_levels, aes(model, PEA))
 f + geom_boxplot()
 
 out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
-plot(out1)out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
+plot(out1)
