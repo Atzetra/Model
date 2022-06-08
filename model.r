@@ -29,11 +29,11 @@ Vmgde <- 3
 # vmax for NAPE to PEA conversion by GDE1_4 enzyme
 Kmgde <- 12000000
 # Km for NAPE to PEA conversion by GDE1_4 enzyme
-Vmfa <- 2.6 * 100
+Vmfa <- 2.6 * 10
 # vmax for PEA to PA conversion by FAAH enzyme
 Kmfa <- 5000
 # Km for PEA to PA conversion by FAAH enzyme
-Vmna <- 12 * 100
+Vmna <- 12 * 10
 # vmax for PEA to PA conversion by NAAA enzyme
 Kmna <- 97000
 # Km for PEA to PA conversion by NAAA enzyme
