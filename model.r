@@ -5,17 +5,17 @@ library(tidyverse)
 
 #################
 # Model parameters
-ks <- 0.2042
+ks <- 0.2054
 # synthesis rate of NAPE
 kdegnape <- 0.001
 # degredation rate of NAPE
 kdeg <- 0.001
 # degradation rate of PA
-kpa <- 0.6
+kpa <- 0.001
 # basal synthesis of PA
 kpeasyn <- 0.0000
 # basal synthesis of PEA
-kpeadeg <- 0.01
+kpeadeg <- 0.0772
 # basal degredation of PEA
 kass <- 0.001
 # assosiation constant of PPAR
@@ -29,11 +29,11 @@ Vmgde <- 3
 # vmax for NAPE to PEA conversion by GDE1_4 enzyme
 Kmgde <- 12000000
 # Km for NAPE to PEA conversion by GDE1_4 enzyme
-Vmfa <- 2.6 * 10
+Vmfa <- 2.6 * 340
 # vmax for PEA to PA conversion by FAAH enzyme
 Kmfa <- 5000
 # Km for PEA to PA conversion by FAAH enzyme
-Vmna <- 12 * 10
+Vmna <- 12 * 340
 # vmax for PEA to PA conversion by NAAA enzyme
 Kmna <- 97000
 # Km for PEA to PA conversion by NAAA enzyme
@@ -186,9 +186,10 @@ df_pea_levels$model <- c("steadystate", "no_faaa", "no_naaa", "no_both")
 df_pea_levels
 
 
+f <- ggplot(df_pea_levels, aes(model, PEA))
+f + geom_col()
 
-# f <- ggplot(df_pea_levels, aes(model, PEA))
-# f + geom_col()
-
-# out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
+out1 <-  ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
 # plot(out1)
+
+df_pea_levels
