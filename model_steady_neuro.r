@@ -21,19 +21,19 @@ kass <- 0.001
 # assosiation constant of PPAR
 kdis <- 0.005
 # dissasociation of PPARa
-Vmpld <- 97.9
+Vmpld <- 97.9 * 0.94
 # vmax for NAPE to PEA conversion by PLD enzyme
 Kmpld <- 3300
 # Km for NAPE to PEA conversion by PLD enzyme
-Vmgde <- 3
+Vmgde <- 3 * 1.24
 # vmax for NAPE to PEA conversion by GDE1_4 enzyme
 Kmgde <- 12000000
 # Km for NAPE to PEA conversion by GDE1_4 enzyme
-Vmfa <- 2.6 * 550
+Vmfa <- 2.6 * 550 * 1.04
 # vmax for PEA to PA conversion by FAAH enzyme
 Kmfa <- 5000
 # Km for PEA to PA conversion by FAAH enzyme
-Vmna <- 12 * 550
+Vmna <- 12 * 550 * 0.91
 # vmax for PEA to PA conversion by NAAA enzyme
 Kmna <- 97000
 # Km for PEA to PA conversion by NAAA enzyme
@@ -89,7 +89,7 @@ rs_steadystate <- runsteady(y = xstart, func = PEA_model_steady, parms = para_st
 PEA_model_no_faah <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
         dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
-        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmna * PEA / (Kmna + PEA)  - kass * PEA + kdis * PPRA - kpeadeg * PEA
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPRA - kpeadeg * PEA
         dPA <- kpa + Vmna * PEA / (Kmna + PEA) + Vmfa * PEA / (Kmfa + PEA) - kdeg * PA
         dPPRA <- kass * PEA - kdis * PPRA
 
@@ -203,10 +203,7 @@ out_comb[,'time'] <- out1[,'time']
 
 out_comb
 
-plot(data.frame(out_comb))
+plot(out_comb)
 df_pea_levels
 
 # Multiply the Vmax by the fold change of the neuro cell lines
-
-i <- ggplot(as.data.frame(out_comb), aes(time, PEA))
-i + geom_line()
