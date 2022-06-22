@@ -2,6 +2,8 @@ rm(list = ls())
 library(deSolve)
 library(rootSolve)
 library(tidyverse)
+library("RColorBrewer")
+library("svglite")
 
 #################
 # Model parameters
@@ -78,7 +80,7 @@ xstart <- c(
     NAPE = 6.7113176,
     PEA = 0.6714116,
     PA = 600.4321418,
-    PPRA = 0.6714116,
+    PPRA = 0.6714116
 )
 
 
@@ -189,8 +191,20 @@ df_pea_levels$model <- c("steadystate", "no_faaa", "no_naaa", "no_both")
 df_pea_levels
 
 
-f <- ggplot(df_pea_levels, aes(model, PEA))
-f + geom_col()
+g <- ggplot() +
+geom_col(data = df_pea_levels, aes(x=model, y=PEA, fill = model)) +
+theme_classic() +
+xlab("Inhibition") +
+ylab("Steadystate PEA Levels") +
+theme(axis.text.x = element_text(angle = 60, hjust = 1), aspect.ratio = 4/3,
+legend.position = "none") +
+scale_x_discrete(labels = c("FAAH + NAAA", "FAAH", "NAAA", "None"))
+g
+
+save(g, file = "figures/ggplots/g.rdata")
+
+ggsave("figures/steadystateNeuro.pdf")
+
 
 out1 <- ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t)
 out2 <- ode(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = t)
@@ -203,7 +217,7 @@ out_comb[,'time'] <- out1[,'time']
 
 out_comb
 
-plot(out_comb)
+# plot(out_comb)
 df_pea_levels
 
 # Multiply the Vmax by the fold change of the neuro cell lines
