@@ -3,6 +3,7 @@ graphics.off()
 library(deSolve)
 library(tidyverse)
 library(scales)
+library(ggpubr)
 
 #################
 # Model parameters
@@ -97,8 +98,8 @@ PEA_model_no_both <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
         if (t < 24 & DRUG >= 0) {
             dDRUG <- -0.12
-        } else if (t > 24 & DRUG <= 0.2) {
-            dDRUG <- 0.002
+        } else if (t > 24 & DRUG <= 1) {
+            dDRUG <- 0.017
         } else {
             dDRUG <- 0
         }
@@ -187,7 +188,7 @@ plot_PEA <- ggplot(combined_df, aes(time, PEA, color = model)) +
     geom_point(data = df_experimental, aes(time, PEA, color = model)) +
     geom_errorbar(data = df_experimental,
     aes(x = time, ymin = PEA - sd, ymax = PEA + sd, color = model)) +
-    labs(x = "Time", y = "PEA Levels", color = "Inhibited pathway") +
+    labs(x = "Time", y = "PEA (fmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
@@ -195,7 +196,7 @@ plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
     scale_y_continuous(
         labels = label_number(accuracy = 0.02)
     ) +
-    labs(x = "Time", y = "NAPE Levels", color = "Inhibited pathway") +
+    labs(x = "Time", y = "NAPE (fmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PPAR <- ggplot(combined_df, aes(time, PPAR, color = model)) +
@@ -203,7 +204,7 @@ plot_PPAR <- ggplot(combined_df, aes(time, PPAR, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time", y = "PPAR Levels", color = "Inhibited pathway") +
+    labs(x = "Time", y = "PPAR binding", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PA <- ggplot(combined_df, aes(time, PA, color = model)) +
@@ -211,7 +212,7 @@ plot_PA <- ggplot(combined_df, aes(time, PA, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time", y = "PA Levels", color = "Inhibited pathway") +
+    labs(x = "Time", y = "PA (fmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_all <- ggarrange(plot_NAPE, plot_PEA, plot_PPAR, plot_PA,
@@ -225,5 +226,3 @@ ncol = 2,
 labels = c("A", "B"),
 widths = c(1,2))
 plot_steady
-
-ggsave("figures/basemodel.pdf")
