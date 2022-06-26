@@ -22,9 +22,9 @@ kpeadeg <- 0.048
 # basal degredation of PEA
 kpeaextra <- 0.08
 # extra pathway of PEA
-kass <- 0.001
+kass <- 0.02
 # assosiation constant of PPAR
-kdis <- 0.001
+kdis <- 0.02
 # dissasociation of PPARa
 Vmpld <- 97.9 * 0.938
 # vmax for NAPE to PEA conversion by PLD enzyme
@@ -67,7 +67,7 @@ para_steady <- unlist(c(data.frame(
 #                   MODELS                  #
 #############################################
 
-t <- seq(0, 96, 1)
+t <- seq(0, 72, 1)
 
 xstart <- c(
     NAPE = 6.710947,
