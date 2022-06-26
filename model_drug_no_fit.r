@@ -34,11 +34,11 @@ Vmgde <- 3
 # vmax for NAPE to PEA conversion by GDE1_4 enzyme
 Kmgde <- 12000000
 # Km for NAPE to PEA conversion by GDE1_4 enzyme
-Vmfa <- 2.6 * 620
+Vmfa <- 2.6
 # vmax for PEA to PA conversion by FAAH enzyme
 Kmfa <- 5000
 # Km for PEA to PA conversion by FAAH enzyme
-Vmna <- 12 * 620
+Vmna <- 12
 # vmax for PEA to PA conversion by NAAA enzyme
 Kmna <- 97000
 # Km for PEA to PA conversion by NAAA enzyme
@@ -67,25 +67,6 @@ para_steady <- unlist(c(data.frame(
 
 PEA_model_steady <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-        if (t < 24 & DRUG >= 0) {
-            dDRUG <- -0.8
-        } else if (t > 24 & DRUG <= 1) {
-            dDRUG <- 0.05
-        } else {
-            dDRUG <- 0
-        }
-        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
-        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPAR - kpeadeg * PEA - kpeaextra * PEA
-        dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) + Vmna * PEA / (Kmna + PEA) + kpeaextra * PEA - kdeg * PA
-        dPPAR <- kass * PEA - kdis * PPAR
-
-        res <- c(dNAPE, dPEA, dPA, dPPAR, dDRUG)
-        list(res)
-    })
-}
-
-PEA_model_steady_no_drug <- function(t, x, parms) {
-    with(as.list(c(parms, x)), {
         dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
         dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPAR - kpeadeg * PEA - kpeaextra * PEA
         dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) + Vmna * PEA / (Kmna + PEA) + kpeaextra * PEA - kdeg * PA
@@ -96,41 +77,28 @@ PEA_model_steady_no_drug <- function(t, x, parms) {
     })
 }
 
+
 t <- seq(0, 72, 1)
 
 xstart <- c(
     NAPE = 6.710947,
-    PEA = 0.6798838,
-    PA = 676.4779672,
-    PPAR = 0.6798813,
-    DRUG = 1
+    PEA = 2.749375,
+    PA = 576.719063,
+    PPAR = 2.749375
 )
 
-xstart_no_drug <- c(
-    NAPE = 6.710947,
-    PEA = 0.6798838,
-    PA = 676.4779672,
-    PPAR = 0.6798813
-)
-
-rs_steady_raw <- runsteady(y = xstart_no_drug, func = PEA_model_steady_no_drug, parms = para_steady, times = c(0, 1e18))
-save(rs_steady_raw, file = "Data/SteadyState/RAW.rdata")
+rs_steady_raw_no_fit <- runsteady(y = xstart, func = PEA_model_steady, parms = para_steady, times = c(0, 1e18))
+save(rs_steady_raw_no_fit, file = "Data/SteadyState/RAWnofit.rdata")
 
 PEA_model_no_both <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-        if (t < 24 & DRUG >= 0) {
-            dDRUG <- -0.12
-        } else if (t > 24 & DRUG <= 1) {
-            dDRUG <- 0.017
-        } else {
-            dDRUG <- 0
-        }
+
         dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
-        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - DRUG * Vmfa * PEA / (Kmfa + PEA) - DRUG * Vmna * PEA / (Kmna + PEA) - kpeadeg * PEA - kpeaextra * PEA - kass * PEA + kdis * PPAR
-        dPA <- kpa + DRUG * Vmfa * PEA / (Kmfa + PEA) + DRUG * Vmna * PEA / (Kmna + PEA) - kdeg * PA
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - kpeadeg * PEA - kpeaextra * PEA - kass * PEA + kdis * PPAR
+        dPA <- kpa - kdeg * PA
         dPPAR <- kass * PEA - kdis * PPAR
 
-        res <- c(dNAPE, dPEA, dPA, dPPAR, dDRUG)
+        res <- c(dNAPE, dPEA, dPA, dPPAR)
         list(res)
     })
 }
@@ -150,6 +118,9 @@ para_no_both <- unlist(c(data.frame(
     Kmgde # Km for NAPE to PEA conversion by GDE1_4 enzyme
 )))
 
+rs_steady_raw_no_fit2 <- runsteady(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = c(0, 1e18))
+
+
 out1 <- ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t, method = "ode45")
 out2 <- ode(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = t, method = "ode45")
 
@@ -158,7 +129,6 @@ out1 <- out1 %>%
     add_column(model = "None")
 out1
 out2 <- as.data.frame(out2)
-save(out2, file = "Data/SteadyState/RAWout2.rdata")
 out2 <- out2 %>%
     add_column(model = "FAAH + NAAH")
 
@@ -184,6 +154,38 @@ df_steady <- data.frame(df_steady.model, df_steady.PEA, df_steady.sd)
 names(df_steady) <- c("model", "PEA", "sd")
 
 #############################################
+#                STEADY STATE               #
+#############################################
+
+# Get None steady state levels
+rs_steady_none <- runsteady(y = xstart, func = PEA_model_steady, parms = para_steady, times = c(0, 1e18))
+steady_none <- as.data.frame(rs_steady_none$y)
+steady_none <- tibble::rownames_to_column(steady_none)
+names(steady_none) <- c("name", "level")
+steady_none <- steady_none %>%
+    pivot_wider(
+    names_from = name,
+    values_from = level
+    )
+steady_none$model <- "None"
+
+# Get FAAH/NAAH steady state levels
+
+rs_steady_both <- runsteady(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = c(0, 1e18))
+steady_both <- as.data.frame(rs_steady_both$y)
+steady_both <- tibble::rownames_to_column(steady_both)
+names(steady_both) <- c("name", "level")
+steady_both <- steady_both %>%
+    pivot_wider(
+    names_from = name,
+    values_from = level
+    )
+steady_both$model <- "FAAH + NAAA"
+
+#Combine them
+steady_levels <- rbind(steady_none, steady_both)
+
+#############################################
 #                   GGPLOT                  #
 #############################################
 
@@ -192,9 +194,10 @@ names(df_steady) <- c("model", "PEA", "sd")
 #                 Column plot               #
 #############################################
 
-line_plot <- ggplot(df_steady) +
-    geom_col(aes(model, PEA, fill = model)) +
-    geom_errorbar(aes(model, ymin = PEA - sd, ymax = PEA + sd)) +
+line_plot <- ggplot() +
+    geom_col(data = steady_levels, aes(model, PEA, fill = model)) +
+    geom_errorbar(data = df_steady, aes(model, ymin = PEA - sd,
+    ymax = PEA + sd),color = "#aeff93") +
     scale_fill_manual(values = c("#000063", "#B07312")) +
     theme(aspect.ratio = 20 / 9,
     legend.position = "none") +
