@@ -18,7 +18,7 @@ kpa <- 0.355
 # basal synthesis of PA
 kpeasyn <- 0.155
 # basal synthesis of PEA
-kpeadeg <- 0.048
+kpeadeg <- 0.04
 # basal degredation of PEA
 kpeaextra <- 0.08
 # extra pathway of PEA
@@ -150,21 +150,37 @@ para_no_both <- unlist(c(data.frame(
     Kmgde # Km for NAPE to PEA conversion by GDE1_4 enzyme
 )))
 
+# Model for no NAAA
+PEA_model_no_naaa <- function(t, x, parms) {
+    with(as.list(c(parms, x)), {
+        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
+        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - kpeadeg * PEA - kpeaextra * PEA - kass * PEA + kdis * PPAR
+        dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) - kdeg * PA
+        dPPAR <- kass * PEA - kdis * PPAR
+
+        res <- c(dNAPE, dPEA, dPA, dPPAR)
+        list(res)
+    })
+}
+
+runsteady_NAAA <- runsteady(y = xstart_no_drug, func = PEA_model_no_naaa, parms = para_steady, times = c(0, 1e18))
+runsteady_NAAA$y
+
+# Run ODE models
+
 out1 <- ode(y = xstart, func = PEA_model_steady, parms = para_steady, times = t, method = "ode45")
 out2 <- ode(y = xstart, func = PEA_model_no_both, parms = para_no_both, times = t, method = "ode45")
 
 out1 <- as.data.frame(out1)
 out1 <- out1 %>%
     add_column(model = "None")
-out1
+
 out2 <- as.data.frame(out2)
 save(out2, file = "Data/SteadyState/RAWout2.rdata")
 out2 <- out2 %>%
     add_column(model = "FAAH + NAAH")
 
 combined_df <- rbind(out1, out2)
-
-combined_df
 
 #############################################
 #                EXPERIMENTAL               #
@@ -183,6 +199,18 @@ df_steady.model <- c("None", "FAAH + NAAA")
 df_steady <- data.frame(df_steady.model, df_steady.PEA, df_steady.sd)
 names(df_steady) <- c("model", "PEA", "sd")
 
+# NAAA Paper compare
+df_NAAA.PEA <- c(0.8709, 1.2062)
+df_NAAA.SD <- c(0.0993, 0.0858)
+df_NAAA.names <- c("None", "NAAA")
+
+df_NAAA <- data.frame(df_NAAA.names, df_NAAA.PEA, df_NAAA.SD)
+names(df_NAAA) <- c("Model", "PEA", "SD")
+df_NAAA
+
+df_naaa_levels <- data.frame(c("None", "NAAA"), c(0.671, 0.800))
+names(df_naaa_levels) <- c("Model", "PEA")
+
 #############################################
 #                   GGPLOT                  #
 #############################################
@@ -198,7 +226,16 @@ line_plot <- ggplot(df_steady) +
     scale_fill_manual(values = c("#000063", "#B07312")) +
     theme(aspect.ratio = 20 / 9,
     legend.position = "none") +
-    labs(x = "Model")
+    labs(x = "Model", y = "PEA (pmol)")
+
+line_naaa <- ggplot() +
+    geom_col(data = df_naaa_levels, aes(Model, PEA, fill = Model)) +
+    geom_errorbar(data = df_NAAA ,aes(Model, ymin = PEA - SD, ymax = PEA + SD)) +
+    scale_fill_manual(values = c("#000063", "#B07312")) +
+    theme(aspect.ratio = 20 / 9,
+    legend.position = "none") +
+    labs(x = "Model", y = "PEA (pmol)")
+line_naaa
 
 #############################################
 #                  Line plot                #
@@ -212,7 +249,7 @@ plot_PEA <- ggplot(combined_df, aes(time, PEA, color = model)) +
     geom_point(data = df_experimental, aes(time, PEA, color = model)) +
     geom_errorbar(data = df_experimental,
     aes(x = time, ymin = PEA - sd, ymax = PEA + sd, color = model)) +
-    labs(x = "Time (h)", y = "PEA (fmol)", color = "Inhibited pathway") +
+    labs(x = "Time (h)", y = "PEA (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
@@ -220,7 +257,7 @@ plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
     scale_y_continuous(
         labels = label_number(accuracy = 0.02)
     ) +
-    labs(x = "Time (h)", y = "NAPE (fmol)", color = "Inhibited pathway") +
+    labs(x = "Time (h)", y = "NAPE (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PPAR <- ggplot(combined_df, aes(time, PPAR, color = model)) +
@@ -236,7 +273,7 @@ plot_PA <- ggplot(combined_df, aes(time, PA, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time (h)", y = "PA (fmol)", color = "Inhibited pathway") +
+    labs(x = "Time (h)", y = "PA (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_all <- ggarrange(plot_NAPE, plot_PEA, plot_PPAR, plot_PA,

@@ -18,7 +18,7 @@ kpa <- 0.4
 # basal synthesis of PA
 kpeasyn <- 0.155
 # basal synthesis of PEA
-kpeadeg <- 0.048
+kpeadeg <- 0.04
 # basal degredation of PEA
 kpeaextra <- 0.08
 # extra pathway of PEA
@@ -186,7 +186,7 @@ steady_compare_NAPE <- ggplot(raw_compare, aes(model, NAPE, fill = model)) +
     legend.position = "none",
     axis.text.x = element_blank(),
     axis.title.x = element_blank()) +
-    labs(y = "NAPE (fmol)", fill = "Model")
+    labs(y = "NAPE (pmol)", fill = "Model")
 
 steady_compare_PEA <- ggplot(raw_compare, aes(model, PEA, fill = model)) +
     geom_col() +
@@ -195,7 +195,7 @@ steady_compare_PEA <- ggplot(raw_compare, aes(model, PEA, fill = model)) +
     legend.position = "none",
     axis.text.x = element_blank(),
     axis.title.x = element_blank()) +
-    labs(y = "PEA (fmol)", fill = "Model")
+    labs(y = "PEA (pmol)", fill = "Model")
 
 steady_compare_PPAR <- ggplot(raw_compare, aes(model, PPAR, fill = model)) +
     geom_col() +
@@ -213,7 +213,7 @@ steady_compare_PA <- ggplot(raw_compare, aes(model, PA, fill = model)) +
     legend.position = "none",
     axis.text.x = element_blank(),
     axis.title.x = element_blank()) +
-    labs(y = "PA (fmol)", fill = "Model")
+    labs(y = "PA (pmol)", fill = "Model")
 
 plot_col_total <- ggarrange(steady_compare_NAPE, steady_compare_PEA,
 steady_compare_PPAR, steady_compare_PA,
@@ -242,7 +242,7 @@ plot_NAPE <- ggplot(comb_line_data, aes(time, NAPE, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time (h)", y = "NAPE (fmol)", color = "Model") +
+    labs(x = "Time (h)", y = "NAPE (pmol)", color = "Model") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PEA <- ggplot(comb_line_data, aes(time, PEA, color = model)) +
@@ -250,7 +250,7 @@ plot_PEA <- ggplot(comb_line_data, aes(time, PEA, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time (h)", y = "PEA (fmol)", color = "Model") +
+    labs(x = "Time (h)", y = "PEA (pmol)", color = "Model") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PPAR <- ggplot(comb_line_data, aes(time, PPAR, color = model)) +
@@ -266,7 +266,7 @@ plot_PA <- ggplot(comb_line_data, aes(time, PA, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time (h)", y = "PA (fmol)", color = "Model") +
+    labs(x = "Time (h)", y = "PA (pmol)", color = "Model") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_all <- ggarrange(plot_NAPE, plot_PEA, plot_PPAR, plot_PA,

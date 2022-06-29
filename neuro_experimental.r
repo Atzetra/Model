@@ -18,7 +18,7 @@ kpa <- 0.4
 # basal synthesis of PA
 kpeasyn <- 0.155
 # basal synthesis of PEA
-kpeadeg <- 0.048
+kpeadeg <- 0.04
 # basal degredation of PEA
 kpeaextra <- 0.08
 # extra pathway of PEA
@@ -79,24 +79,7 @@ xstart <- c(
 
 # No inhibition model
 
-PEA_model_steady <- function(t, x, parms) {
-    with(as.list(c(parms, x)), {
-        if (t < 24 & DRUG >= 0) {
-            dDRUG <- -0.8
-        } else if (t > 24 & DRUG <= 1) {
-            dDRUG <- 0.05
-        } else {
-            dDRUG <- 0
-        }
-        dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
-        dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - Vmfa * PEA / (Kmfa + PEA) - Vmna * PEA / (Kmna + PEA) - kass * PEA + kdis * PPAR - kpeadeg * PEA - kpeaextra * PEA
-        dPA <- kpa + Vmfa * PEA / (Kmfa + PEA) + Vmna * PEA / (Kmna + PEA) + kpeaextra * PEA - kdeg * PA
-        dPPAR <- kass * PEA - kdis * PPAR
 
-        res <- c(dNAPE, dPEA, dPA, dPPAR, dDRUG)
-        list(res)
-    })
-}
 
 # FAAH + NAAA Inhibition
 

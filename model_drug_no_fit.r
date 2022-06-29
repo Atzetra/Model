@@ -92,7 +92,6 @@ save(rs_steady_raw_no_fit, file = "Data/SteadyState/RAWnofit.rdata")
 
 PEA_model_no_both <- function(t, x, parms) {
     with(as.list(c(parms, x)), {
-
         dNAPE <- ks - Vmpld * NAPE / (Kmpld + NAPE) - Vmgde * NAPE / (Kmgde + NAPE) - kdegnape * NAPE
         dPEA <- kpeasyn + Vmpld * NAPE / (Kmpld + NAPE) + Vmgde * NAPE / (Kmgde + NAPE) - kpeadeg * PEA - kpeaextra * PEA - kass * PEA + kdis * PPAR
         dPA <- kpa - kdeg * PA
@@ -164,8 +163,8 @@ steady_none <- tibble::rownames_to_column(steady_none)
 names(steady_none) <- c("name", "level")
 steady_none <- steady_none %>%
     pivot_wider(
-    names_from = name,
-    values_from = level
+        names_from = name,
+        values_from = level
     )
 steady_none$model <- "None"
 
@@ -177,12 +176,12 @@ steady_both <- tibble::rownames_to_column(steady_both)
 names(steady_both) <- c("name", "level")
 steady_both <- steady_both %>%
     pivot_wider(
-    names_from = name,
-    values_from = level
+        names_from = name,
+        values_from = level
     )
 steady_both$model <- "FAAH + NAAA"
 
-#Combine them
+# Combine them
 steady_levels <- rbind(steady_none, steady_both)
 
 #############################################
@@ -196,12 +195,16 @@ steady_levels <- rbind(steady_none, steady_both)
 
 line_plot <- ggplot() +
     geom_col(data = steady_levels, aes(model, PEA, fill = model)) +
-    geom_errorbar(data = df_steady, aes(model, ymin = PEA - sd,
-    ymax = PEA + sd),color = "#aeff93") +
+    geom_errorbar(data = df_steady, aes(model,
+        ymin = PEA - sd,
+        ymax = PEA + sd
+    ), color = "#ffffff") +
     scale_fill_manual(values = c("#000063", "#B07312")) +
-    theme(aspect.ratio = 20 / 9,
-    legend.position = "none") +
-    labs(x = "Model")
+    theme(
+        aspect.ratio = 20 / 9,
+        legend.position = "none"
+    ) +
+    labs(x = "Model", y = "PEA (pmol)")
 
 #############################################
 #                  Line plot                #
@@ -213,9 +216,11 @@ plot_PEA <- ggplot(combined_df, aes(time, PEA, color = model)) +
         labels = label_number_auto()
     ) +
     geom_point(data = df_experimental, aes(time, PEA, color = model)) +
-    geom_errorbar(data = df_experimental,
-    aes(x = time, ymin = PEA - sd, ymax = PEA + sd, color = model)) +
-    labs(x = "Time (h)", y = "PEA (fmol)", color = "Inhibited pathway") +
+    geom_errorbar(
+        data = df_experimental,
+        aes(x = time, ymin = PEA - sd, ymax = PEA + sd, color = model)
+    ) +
+    labs(x = "Time (h)", y = "PEA (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
@@ -223,7 +228,7 @@ plot_NAPE <- ggplot(combined_df, aes(time, NAPE, color = model)) +
     scale_y_continuous(
         labels = label_number(accuracy = 0.02)
     ) +
-    labs(x = "Time (h)", y = "NAPE (fmol)", color = "Inhibited pathway") +
+    labs(x = "Time (h)", y = "NAPE (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_PPAR <- ggplot(combined_df, aes(time, PPAR, color = model)) +
@@ -239,7 +244,7 @@ plot_PA <- ggplot(combined_df, aes(time, PA, color = model)) +
     scale_y_continuous(
         labels = label_number_auto()
     ) +
-    labs(x = "Time (h)", y = "PA (fmol)", color = "Inhibited pathway") +
+    labs(x = "Time (h)", y = "PA (pmol)", color = "Inhibited pathway") +
     scale_color_manual(values = c("#000063", "#B07312"))
 
 plot_all <- ggarrange(plot_NAPE, plot_PEA, plot_PPAR, plot_PA,
@@ -249,7 +254,8 @@ plot_all <- ggarrange(plot_NAPE, plot_PEA, plot_PPAR, plot_PA,
 )
 
 plot_steady <- ggarrange(line_plot, plot_all,
-ncol = 2,
-labels = c("A", "B"),
-widths = c(1,2))
+    ncol = 2,
+    labels = c("A", "B"),
+    widths = c(1, 2)
+)
 plot_steady
